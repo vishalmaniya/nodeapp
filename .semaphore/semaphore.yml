@@ -1,0 +1,33 @@
+version: v1.0
+name: Test MyApp
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+blocks:
+  - name: Install
+    task:
+      jobs:
+        - name: npm install
+          commands:
+            - checkout
+            - sem-version node 12
+            - cache restore
+            - npm install
+            - cache store
+  - name: mocha
+    task:
+      env_vars:
+        - name: NODE_ENV
+          value: test
+      prologue:
+        commands:
+          - checkout
+          - sem-version node 12
+          - cache restore
+      jobs:
+        - name: npm run
+          commands:
+            - npm run build --if-present
+            - node app/server.js &
+            - npm test
